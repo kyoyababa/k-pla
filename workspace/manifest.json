@@ -1,0 +1,32 @@
+{
+  "manifest_version": 1,
+  "name": "k-pla",
+  "description": "",
+  "version": "32.0.0",
+  "default_locale": "ja",
+  "icons": {
+    "128": "assets/images/icon.png"
+  },
+  "background": {
+    "scripts": [
+      "assets/scripts/kPla__background.js"
+    ],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_icon": {
+      "128": "assets/images/icon-kun.png"
+    },
+    "default_title": "k-pla",
+  },
+  "content_scripts": [
+    {
+      "matches": ["*"],
+      "js": ["assets/scripts/k-pla__content.js"]
+    }
+  ],
+  "permissions": ["*", "storage"],
+  "web_accessible_resources": [
+    "assets/images/icon.png"
+  ]
+}
