@@ -4,7 +4,6 @@ import $ from 'jquery';
 
 class KPla {
   constructor() {
-    this.setAdditionalStyles();
     this.startMutationObserver();
   }
 
@@ -49,17 +48,24 @@ class KPla {
   }
 
   private activateDescriptionModalOpener($roomName: JQuery): void {
-    $('#jsi-kPla-mark').click(() => {
-      $roomName.append(this.generateRoomDescriptionModal());
-      this.activateDescriptionModalCloser();
+    const _this = this;
+
+    $('#jsi-kPla-mark').click(function() {
+      $roomName.append(_this.generateRoomDescriptionModal($(this)));
+      _this.activateDescriptionModalCloser();
     });
   }
 
-  private generateRoomDescriptionModal(): string {
+  private generateRoomDescriptionModal($markElement: JQuery): string {
     return `
-      <div id="jsi-kPla-room-description" class="kPla-room-description">
+      <div id="jsi-kPla-room-description"
+           class="kPla-room-description"
+           style="left: ${this.calculateModalLeftPosition($markElement)}px">
+
         <a id="jsi-kPla-close-description-trigger" class="kPla-close-description-trigger">
-          <img src="https://dummyimage.com/25x25/333/fff" alt="">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path>
+          </svg>
         </a>
         <div class="kPla-room-name">
           <img src="https://dummyimage.com/100x100/333/fff" alt="">
@@ -73,67 +79,55 @@ class KPla {
           <img src="https://dummyimage.com/200x150/333/fff" alt="">
         </figure>
       </div>
+      <div class="kPla-room-description-arrow"
+           style="${this.calculateModalArrowPosition($markElement)}">
+        <div></div>
+      </div>
     `;
+  }
+
+  private calculateModalLeftPosition($markElement: JQuery): number {
+    const leftPosition = (<{ left: number }>$markElement.offset()).left;
+    const modalPadding = 20;
+    const modalWidth = 240 + modalPadding * 2;
+
+    if (this.shouldSetModalToLeft(leftPosition)) {
+      return leftPosition - modalWidth;
+    } else {
+      const gCalDetailWidth = (<number>$markElement.parents('[jsmodel]').innerWidth());
+      return leftPosition + gCalDetailWidth - modalWidth;
+    }
+  }
+
+  private calculateModalArrowPosition($markElement: JQuery): string {
+    const offset = <{ top: number, left: number }>$markElement.offset();
+    const modalPadding = 20;
+
+    if (this.shouldSetModalToLeft(offset.left)) {
+      return `
+        top: ${offset.top}px;
+        left: ${offset.left - modalPadding * 2}px;
+      `;
+    } else {
+      const modalWidth = 240 + modalPadding * 2;
+      const gCalDetailWidth = (<number>$markElement.parents('[jsmodel]').innerWidth());
+      return `
+        top: ${offset.top}px;
+        left: ${offset.left + gCalDetailWidth - modalWidth - modalPadding}px;
+        transform: rotate(180deg);
+      `;
+    }
+  }
+
+  private shouldSetModalToLeft(leftPosition: number): boolean {
+    const windowWidth = $(window).width();
+    return <number>windowWidth / 2 < leftPosition;
   }
 
   private activateDescriptionModalCloser(): void {
     $('#jsi-kPla-close-description-trigger').click(() => {
       $('#jsi-kPla-room-description').remove();
     });
-  }
-
-  private setAdditionalStyles(): void {
-    $('body').append(`
-      <style>
-        [aria-label="Rooms and resources"] > li {
-          position: relative;
-          padding-left: calc(1.5em + 0.5em);
-        }
-
-        .kPla-mark > img {
-          position: absolute;
-          top: 50%;
-          left: 0;
-          height: 1.5em;
-          transform: translate(0, -50%);
-        }
-
-        .kPla-room-name > ruby {
-          display: block;
-        }
-
-        .kPla-room-description {
-          z-index: 9999;
-          position: fixed;
-          top: 10%;
-          left: 35%;
-          background-color: #FFFFFF;
-          width: 200px;
-          padding: 20px;
-          border: 2px solid #333333;
-          white-space: normal;
-          transform: translate(-50%, 0);
-        }
-
-        .kPla-room-description > div {
-          text-align: center;
-        }
-
-        .kPla-room-description > figure {
-          margin: 0;
-        }
-
-        .kPla-close-description-trigger {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-        }
-
-        .kPla-close-description-trigger > img {
-          vertical-align: top;
-        }
-      </style>
-    `);
   }
 }
 
